@@ -1,4 +1,4 @@
-A ZSH plugin that makes you type your command only by playing snake!
+A ZSH plugin that makes you type your commands only by playing snake!
 
 ## requirements
 1. python 3
