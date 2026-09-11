@@ -1,0 +1,11 @@
+{
+    "char_spawn": {
+        "mode": 1,
+        "amount_in_lines": 12,
+        "space_between": 3
+    },
+    "speed": 160,
+    "min_speed": 70,
+    "speedup_every": 4,
+    "speedup_step": 8
+}

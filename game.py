@@ -1,14 +1,16 @@
 import curses
+import json
 import math
 import random
 import sys
+from pathlib import Path
 
-CHARPOOL = list("abcdefghijklmnopqrstuvwxyz0123456789-_/|><*~'\"")
-CHARPOOL.append(" ")  # space is included, but rendered specially so it's visible
+BASE_DIR = Path(__file__).resolve().parent
 
-ENTER_CH = "\u23ce"  # submit tile
-BACK_CH = "\u232b"  # backspace tile
-SPACE_DISPLAY = "\u2423"  # space tile
+CHARPOOL = list("abcdefghijklmnopqrstuvwxyz0123456789-_/|><*~'\" ")
+ENTER_CH = "\u23ce"
+BACK_CH = "\u232b"
+SPACE_DISPLAY = "\u2423"
 
 DIRS = {
     curses.KEY_UP: (-1, 0), ord('w'): (-1, 0),
@@ -16,21 +18,8 @@ DIRS = {
     curses.KEY_LEFT: (0, -1), ord('a'): (0, -1),
     curses.KEY_RIGHT: (0, 1), ord('d'): (0, 1),
 }
-
-INITIAL_SPEED_MS = 160
-MIN_SPEED_MS = 70
-SPEEDUP_EVERY = 4
-SPEEDUP_STEP_MS = 8
-
-INIT_SPAWN_MODE = 1
-# 0: random spawn
-# 1: ordered, in the center
-
-TILE_DENSITY = 0.06
-
-INIT_SPAWN_LINE_WIDTH = 12
-INIT_SPAWN_LINE_SPACE = 3
-
+with open(BASE_DIR/"config.json") as file:
+    config=json.load(file)
 
 def run(stdscr):
     curses.curs_set(0)
@@ -68,27 +57,30 @@ def run(stdscr):
         tiles[(y, x)] = ch
 
     def initial_spawn_tile():
-        match (INIT_SPAWN_MODE):
+        match (config['char_spawn']['mode']):
             case 0:
                 for ch in CHARPOOL:
                     y, x = random_empty_cell()
                     tiles[(y, x)] = ch
 
             case 1:
-                lines = math.ceil(len(CHARPOOL) / INIT_SPAWN_LINE_WIDTH)
-                h = (lines - 1) * INIT_SPAWN_LINE_SPACE
-                w = (INIT_SPAWN_LINE_WIDTH - 1) * INIT_SPAWN_LINE_SPACE
+                amount_in_lines = config['char_spawn']['amount_in_lines']
+                line_space = config['char_spawn']['space_between']
+
+                lines = math.ceil(len(CHARPOOL) / amount_in_lines)
+                h = (lines - 1) * line_space
+                w = (amount_in_lines - 1) * line_space
 
                 s_h = (board_h - h) // 2
                 s_w = (board_w - w) // 2
 
                 i, j = 0, 0
                 for ch in CHARPOOL:
-                    x = s_w + (i * INIT_SPAWN_LINE_SPACE)
-                    y = s_h + (j * INIT_SPAWN_LINE_SPACE)
+                    x = s_w + (i * line_space)
+                    y = s_h + (j * line_space)
                     tiles[(y, x)] = ch
                     i += 1
-                    if i == INIT_SPAWN_LINE_WIDTH:
+                    if i == amount_in_lines:
                         i = 0
                         j += 1
 
@@ -97,7 +89,7 @@ def run(stdscr):
     tiles[random_empty_cell()] = BACK_CH
 
     typed = []
-    speed = INITIAL_SPEED_MS
+    speed = config['speed']
     eaten = 0
 
     def draw():
@@ -169,8 +161,8 @@ def run(stdscr):
                 typed.append(ch)
                 eaten += 1
                 spawn_tile(ch)
-                if eaten % SPEEDUP_EVERY == 0 and speed > MIN_SPEED_MS:
-                    speed -= SPEEDUP_STEP_MS
+                if eaten % config['speedup_every'] == 0 and speed > config['min_speed']:
+                    speed -= config['speedup_step']
                     stdscr.timeout(speed)
         else:
             snake.pop()
