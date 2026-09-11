@@ -7,19 +7,24 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 
-CHARPOOL = list("abcdefghijklmnopqrstuvwxyz0123456789-_/|><*~'\" ")
+
+with open(BASE_DIR/"config.json") as file:
+    config=json.load(file)
+
+
+CHARPOOL = list(config['characters'])
 ENTER_CH = "\u23ce"
 BACK_CH = "\u232b"
 SPACE_DISPLAY = "\u2423"
 
+control_keys = config['controls']['up']+config['controls']['left']+config['controls']['down']+config['controls']['right']
+
 DIRS = {
-    curses.KEY_UP: (-1, 0), ord('w'): (-1, 0),
-    curses.KEY_DOWN: (1, 0), ord('s'): (1, 0),
-    curses.KEY_LEFT: (0, -1), ord('a'): (0, -1),
-    curses.KEY_RIGHT: (0, 1), ord('d'): (0, 1),
+    curses.KEY_UP: (-1, 0), ord(control_keys[0]): (-1, 0),
+    curses.KEY_LEFT: (0, -1), ord(control_keys[1]): (0, -1),
+    curses.KEY_DOWN: (1, 0), ord(control_keys[2]): (1, 0),
+    curses.KEY_RIGHT: (0, 1), ord(control_keys[3]): (0, 1),
 }
-with open(BASE_DIR/"config.json") as file:
-    config=json.load(file)
 
 def run(stdscr):
     curses.curs_set(0)
@@ -117,7 +122,7 @@ def run(stdscr):
                 pass
         cmd_line = "".join(typed)
         status1 = f" cmd> {cmd_line}"[: max_x - 1]
-        status2 = f"Score:{eaten}  [WASD/arrows move, q quits]"[: max_x - 1]
+        status2 = f"Score:{eaten}  [{control_keys}/arrows move, q quits]"[: max_x - 1]
         try:
             stdscr.addstr(max_y - 2, 0, status1, curses.color_pair(4))
             stdscr.addstr(max_y - 1, 0, status2, curses.color_pair(4))

@@ -1,8 +1,15 @@
 {
+    "characters": "abcdefghijklmnopqrstuvwxyz0123456789-_/|><*~'\" ",
     "char_spawn": {
         "mode": 1,
         "amount_in_lines": 12,
         "space_between": 3
+    },
+    "controls": {
+        "up": "w",
+        "left": "a",
+        "down": "s",
+        "right": "d"
     },
     "speed": 160,
     "min_speed": 70,
