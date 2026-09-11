@@ -1,5 +1,7 @@
 A ZSH plugin that makes you type your commands only by playing snake!
 
+![showcase](/docs/output.gif)
+
 ## requirements
 1. python 3
 2. ZSH shell
